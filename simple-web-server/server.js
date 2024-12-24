@@ -8,7 +8,7 @@ app.get("/", (req, res) => {
 
 app.get("/info", (req, res) => {
   res.json({
-    name: "Simple Web Server1213",
+    name: "Simple Web Server12136",
     version: "1.0.0",
     uptime: process.uptime(),
   });
@@ -16,7 +16,7 @@ app.get("/info", (req, res) => {
 
 app.get("/about-me", (req, res) => {
   res.json({
-    name: "his is Mr. Milon's first CI/CD application.",
+    name: "his is Mr. Milon's first CI/CD application34.",
     version: "1.0.0",
     uptime: process.uptime(),
   });
