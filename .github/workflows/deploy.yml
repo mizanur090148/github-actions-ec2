@@ -16,44 +16,55 @@ jobs:
           HOST: ${{ secrets.EC2_HOST }}
           USER: ${{ secrets.EC2_USER }}
         run: |
+          # Save and set permissions for the private key
           echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
+
+          # Connect to EC2 and deploy
           ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
-          echo "Current directory: $(pwd)"
-          echo "Listing home directory:"
-          ls -la ~
+          set -e  # Stop on error
 
-          echo "Installing Node.js..."
-          if ! command -v nvm &> /dev/null; then
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-          fi
-          nvm install node
+          echo "=== Starting Deployment ==="
 
-          echo "Installing PM2..."
-          if ! command -v pm2 &> /dev/null; then
-          npm install -g pm2
-          fi
-
+          # Set up repository details
           REPO_URL="https://github.com/afkzoro/github-aws-ec2.git"
           BRANCH="main"
           REPO_DIR="$HOME/github-aws-ec2"
 
+          # Clone or update the repository
           if [ -d "$REPO_DIR/.git" ]; then
+            echo "Pulling latest changes..."
             cd "$REPO_DIR"
+            git reset --hard HEAD  # Ensure a clean state
             git pull origin "$BRANCH"
           else
+            echo "Cloning repository..."
             git clone "$REPO_URL" "$REPO_DIR"
             cd "$REPO_DIR"
           fi
 
+          # Navigate to the application directory
           cd "$REPO_DIR/simple-web-server"
+
+          echo "Installing dependencies..."
           npm install
 
-          cd ~/github-aws-ec2/simple-web-server
-          git pull origin main
-          npm install
+          # Ensure Node.js and PM2 are installed
+          if ! command -v nvm &> /dev/null; then
+            echo "Installing NVM..."
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Load NVM
+          fi
+          nvm install node
+
+          if ! command -v pm2 &> /dev/null; then
+            echo "Installing PM2..."
+            npm install -g pm2
+          fi
 
           echo "Starting/restarting application..."
-          pm2 restart server.js || pm2 start server.js
+          pm2 delete simple-web-server || true  # Ignore if the process doesn't exist
+          pm2 start server.js --name "simple-web-server"
+
+          echo "=== Deployment Complete ==="
           '
