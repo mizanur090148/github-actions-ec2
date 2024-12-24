@@ -16,17 +16,27 @@ jobs:
           HOST: ${{ secrets.EC2_HOST }}
           USER: ${{ secrets.EC2_USER }}
         run: |
-          # Save and set permissions for the private key
           echo "$PRIVATE_KEY" > github-ec2.pem && chmod 600 github-ec2.pem
-
-          # Connect to EC2 and deploy
           ssh -o StrictHostKeyChecking=no -i github-ec2.pem ${USER}@${HOST} '
-          set -e  # Stop on error
+          echo "Starting deployment process..."
 
-          echo "=== Starting Deployment ==="
+          # Ensure NVM and Node.js are installed
+          echo "Installing Node.js via NVM..."
+          if ! command -v nvm &> /dev/null; then
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          fi
+          nvm install node
 
-          # Set up repository details
-          REPO_URL="https://github.com/afkzoro/github-aws-ec2.git"
+          # Ensure PM2 is installed
+          echo "Installing PM2..."
+          if ! command -v pm2 &> /dev/null; then
+            npm install -g pm2
+          fi
+
+          # Set repository details
+          REPO_URL="https://github.com/mizanur090148/github-actions-ec2.git"
           BRANCH="main"
           REPO_DIR="$HOME/github-aws-ec2"
 
@@ -34,7 +44,7 @@ jobs:
           if [ -d "$REPO_DIR/.git" ]; then
             echo "Pulling latest changes..."
             cd "$REPO_DIR"
-            git reset --hard HEAD  # Ensure a clean state
+            git reset --hard HEAD # Ensure a clean working directory
             git pull origin "$BRANCH"
           else
             echo "Cloning repository..."
@@ -42,29 +52,16 @@ jobs:
             cd "$REPO_DIR"
           fi
 
-          # Navigate to the application directory
+          # Navigate to the correct subdirectory
           cd "$REPO_DIR/simple-web-server"
 
+          # Install dependencies
           echo "Installing dependencies..."
           npm install
 
-          # Ensure Node.js and PM2 are installed
-          if ! command -v nvm &> /dev/null; then
-            echo "Installing NVM..."
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Load NVM
-          fi
-          nvm install node
+          # Restart or start the application with PM2
+          echo "Starting/restarting application with PM2..."
+          pm2 start server.js --name "simple-web-server" || pm2 restart "simple-web-server"
 
-          if ! command -v pm2 &> /dev/null; then
-            echo "Installing PM2..."
-            npm install -g pm2
-          fi
-
-          echo "Starting/restarting application..."
-          pm2 delete simple-web-server || true  # Ignore if the process doesn't exist
-          pm2 start server.js --name "simple-web-server"
-
-          echo "=== Deployment Complete ==="
+          echo "Deployment complete!"
           '
