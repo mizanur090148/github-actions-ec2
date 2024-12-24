@@ -8,7 +8,7 @@ app.get("/", (req, res) => {
 
 app.get("/info", (req, res) => {
   res.json({
-    name: "Simple Web Server123",
+    name: "Simple Web Server1213",
     version: "1.0.0",
     uptime: process.uptime(),
   });
