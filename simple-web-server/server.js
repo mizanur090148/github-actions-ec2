@@ -17,6 +17,8 @@ app.get("/info", (req, res) => {
 app.get("/about-me", (req, res) => {
   res.json({
     name: "his is Mr. Milon's first CI/CD application.",
+    version: "1.0.0",
+    uptime: process.uptime(),
   });
 });
 
