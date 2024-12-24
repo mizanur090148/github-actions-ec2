@@ -1,4 +1,4 @@
-name: Deploy to EC2 Via CI/CD
+name: Deploy to EC2 Via CI/CD1
 
 on:
   push:
