@@ -1,4 +1,4 @@
-name: Deploy to EC2 Via CI/CD
+name: Deploy to EC2
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Deploy to EC2 Via CI/CD
+      - name: Deploy to EC2
         env:
           PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
           HOST: ${{ secrets.EC2_HOST }}
