@@ -14,6 +14,12 @@ app.get("/info", (req, res) => {
   });
 });
 
+app.get("/about-me", (req, res) => {
+  res.json({
+    name: "his is Mr. Milon's first CI/CD application.",
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
