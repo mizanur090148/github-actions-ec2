@@ -30,6 +30,13 @@ app.get("/contact", (req, res) => {
   });
 });
 
+app.get("/version", (req, res) => {
+  res.json({
+    name: "This is version API",
+    version: "1.0.0",
+    uptime: process.uptime(),
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
