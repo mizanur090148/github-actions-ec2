@@ -16,11 +16,20 @@ app.get("/info", (req, res) => {
 
 app.get("/about-me", (req, res) => {
   res.json({
-    name: "his is Mr. Milon's first CI/CD application349.",
+    name: "This is Mr. Milon's first CI/CD application349.",
     version: "1.0.0",
     uptime: process.uptime(),
   });
 });
+
+app.get("/contact", (req, res) => {
+  res.json({
+    name: "Village + Post: Gotia, Thana + Zilla: Sirajganj",
+    version: "1.0.0",
+    uptime: process.uptime(),
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
