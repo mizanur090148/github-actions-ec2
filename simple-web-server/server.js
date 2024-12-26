@@ -38,6 +38,14 @@ app.get("/version", (req, res) => {
   });
 });
 
+app.get("/current-user", (req, res) => {
+  res.json({
+    name: "Mr Mizanur Rahman",
+    version: "1.0.0",
+    uptime: process.uptime(),
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
